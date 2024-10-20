@@ -96,7 +96,7 @@ contract AIPredictionMarketTest is Test {
 
         // Total bets: AI A = 400 ether, AI B = 200 ether
 
-        // Settle market: AI A wins
+        // Settle market: AI A wins (by the owner)
         predictionMarket.settleMarket(true);
 
         // Alice claims her reward
@@ -130,6 +130,21 @@ contract AIPredictionMarketTest is Test {
         // Verify fee recipient's balance
         assertEq(betToken.balanceOf(feeRecipient), feeAmount);
     }
+
+    function testOnlyOwnerCanSettleMarket() public {
+    // Alice tries to settle the market (not the owner)
+    vm.startPrank(alice);
+    vm.expectRevert(); // Expect any revert
+    predictionMarket.settleMarket(true);
+    vm.stopPrank();
+
+    // The owner settles the market
+    predictionMarket.settleMarket(true);
+
+    // Verify market is settled
+    assertEq(predictionMarket.marketSettled(), true);
+    assertEq(predictionMarket.aiAWon(), true);
+}
 
     // Include other test functions as previously defined, ensuring they align with the updated contract.
 }

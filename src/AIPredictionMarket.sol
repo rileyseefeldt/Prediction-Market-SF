@@ -2,10 +2,11 @@
 pragma solidity ^0.8.24;
 
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 
 /// @title AI Prediction Market Contract
 /// @notice This contract allows users to bet on which AI will win in a competition.
-contract AIPredictionMarket {
+contract AIPredictionMarket is Ownable {
     // Mapping to keep track of users' bets on AI A and AI B
     mapping(address => uint256) public betsOnA;
     mapping(address => uint256) public betsOnB;
@@ -45,7 +46,7 @@ contract AIPredictionMarket {
     constructor(
         IERC20 _betToken,
         address _feeRecipient
-    ) {
+    ) Ownable(msg.sender) {
         betToken = _betToken;
         feeRecipient = _feeRecipient;
     }
@@ -73,9 +74,8 @@ contract AIPredictionMarket {
 
     /// @notice Settles the market by declaring the winning AI
     /// @param _aiAWon True if AI A won, false if AI B won
-    function settleMarket(bool _aiAWon) external {
+    function settleMarket(bool _aiAWon) external onlyOwner {
         require(!marketSettled, "Market already settled");
-        // In production, this should be restricted or use an oracle
         aiAWon = _aiAWon;
         marketSettled = true;
         emit MarketSettled(aiAWon);
